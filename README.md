@@ -201,7 +201,6 @@ establish a secure connection to it. To learn more about this situation and
 how to fix it, please visit the web page mentioned above.
 ```
 
-
 Содержание файла /etc/apache2/sites-available/test.site.conf
 
 ```
@@ -215,34 +214,34 @@ CustomLog ${APACHE_LOG_DIR}/access.log combined
 </VirtualHost>
 ```
 
-
-
 Содержание файла /etc/apache2/sites-available/default-ssl.conf
 
+```
 <IfModule mod_ssl.c>
-        <VirtualHost _default_:443>
-                ServerAdmin your_email@example.com
-                ServerName 127.0.0.1
+    <VirtualHost _default_:443>
+            ServerAdmin your_email@example.com
+            ServerName 127.0.0.1
 
-                DocumentRoot /var/www/html
+            DocumentRoot /var/www/html
 
-                ErrorLog ${APACHE_LOG_DIR}/error.log
-                CustomLog ${APACHE_LOG_DIR}/access.log combined
+            ErrorLog ${APACHE_LOG_DIR}/error.log
+            CustomLog ${APACHE_LOG_DIR}/access.log combined
 
-                SSLEngine on
+            SSLEngine on
 
-                SSLCertificateFile      /etc/ssl/certs/apache-selfsigned.crt
-                SSLCertificateKeyFile /etc/ssl/private/apache-selfsigned.key
+            SSLCertificateFile      /etc/ssl/certs/apache-selfsigned.crt
+            SSLCertificateKeyFile /etc/ssl/private/apache-selfsigned.key
 
-                <FilesMatch "\.(cgi|shtml|phtml|php)$">
-                                SSLOptions +StdEnvVars
-                </FilesMatch>
-                <Directory /usr/lib/cgi-bin>
-                                SSLOptions +StdEnvVars
-                </Directory>
-        </VirtualHost>
+            <FilesMatch "\.(cgi|shtml|phtml|php)$">
+                            SSLOptions +StdEnvVars
+            </FilesMatch>
+            <Directory /usr/lib/cgi-bin>
+                            SSLOptions +StdEnvVars
+            </Directory>
+    </VirtualHost>
+
 </IfModule>
-
+```
 
 (4) Проверьте на TLS уязвимости произвольный сайт в интернете (кроме сайтов МВД, ФСБ, МинОбр, НацБанк, РосКосмос, РосАтом, РосНАНО и любых госкомпаний, объектов КИИ, ВПК ... и тому подобное).
 
@@ -304,15 +303,14 @@ root@vagrant:~/testssl.sh# ./testssl.sh -U --sneaky https://www.ozon.ru/
  Done 2022-02-28 17:44:53 [  51s] -->> 45.60.40.164:443 (www.ozon.ru) <<--
 
 ```
+
 (5) Установите на Ubuntu ssh сервер, сгенерируйте новый приватный ключ. Скопируйте свой публичный ключ на другой сервер. Подключитесь к серверу по SSH-ключу.
 
 *Решение*
 
-
 (6) Переименуйте файлы ключей из задания 5. Настройте файл конфигурации SSH клиента, так чтобы вход на удаленный сервер осуществлялся по имени сервера.
 
 *Решение*
-
 
 (7) Соберите дамп трафика утилитой tcpdump в формате pcap, 100 пакетов. Откройте файл pcap в Wireshark.
 
