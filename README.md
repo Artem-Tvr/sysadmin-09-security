@@ -18,67 +18,15 @@
 
 *Решение*
 
-Ниже указал последовательность моих действий, но в браузере сайт не открылся и при проверке на корректность настроек выдал следующее - AH00112: Warning: DocumentRoot [/var/www/test.site/public_html] does not exist - ругается что не существует директория, но как ее создать не понял. Подскажите куда копать?
+Ниже указал последовательность моих действий, но в браузере сайт не о Подскажите куда копать?
 
 ```
-
-root@vagrant:~# a2ensite test.site
-ERROR: Site test.site does not exist!
-root@vagrant:~# nano /etc/apache2/sites-available/test.site.conf
-root@vagrant:~# a2ensite test.site
-Enabling site test.site.
-To activate the new configuration, you need to run:
-  systemctl reload apache2
-root@vagrant:~# systemctl reload apache2
-root@vagrant:~# nano /etc/hosts
-root@vagrant:~# systemctl reload apache2
-root@vagrant:~# apache2ctl -M
-AH00112: Warning: DocumentRoot [/var/www/test.site/public_html] does not exist
-AH00558: apache2: Could not reliably determine the server's fully qualified domain name, using 127.0.1.1. Set the 'ServerName' directive globally to suppress this message
-Loaded Modules:
- core_module (static)
- so_module (static)
- watchdog_module (static)
- http_module (static)
- log_config_module (static)
- logio_module (static)
- version_module (static)
- unixd_module (static)
- access_compat_module (shared)
- alias_module (shared)
- auth_basic_module (shared)
- authn_core_module (shared)
- authn_file_module (shared)
- authz_core_module (shared)
- authz_host_module (shared)
- authz_user_module (shared)
- autoindex_module (shared)
- deflate_module (shared)
- dir_module (shared)
- env_module (shared)
- filter_module (shared)
- mime_module (shared)
- mpm_event_module (shared)
- negotiation_module (shared)
- reqtimeout_module (shared)
- setenvif_module (shared)
- status_module (shared)
-root@vagrant:~# a2enmod expires
-Enabling module expires.
-To activate the new configuration, you need to run:
-  systemctl restart apache2
-root@vagrant:~# systemctl reload apache2
-root@vagrant:~# a2enmod headers
-Enabling module headers.
-To activate the new configuration, you need to run:
-  systemctl restart apache2
-root@vagrant:~# systemctl restart apache2
-root@vagrant:~# a2enmod rewrite
-Enabling module rewrite.
-To activate the new configuration, you need to run:
-  systemctl restart apache2
-root@vagrant:~# systemctl restart apache2
-root@vagrant:~# a2enmod ssl
+artem@artem-aspirer3610:~$ sudo systemctl enable apache2
+Synchronizing state of apache2.service with SysV service script with /lib/systemd/systemd-sysv-install.
+Executing: /lib/systemd/systemd-sysv-install enable apache2
+artem@artem-aspirer3610:~$ Sudo a2enmod ssl
+bash: Sudo: команда не найдена
+artem@artem-aspirer3610:~$ sudo a2enmod ssl
 Considering dependency setenvif for ssl:
 Module setenvif already enabled
 Considering dependency mime for ssl:
@@ -89,23 +37,13 @@ Enabling module ssl.
 See /usr/share/doc/apache2/README.Debian.gz on how to configure SSL and create self-signed certificates.
 To activate the new configuration, you need to run:
   systemctl restart apache2
-root@vagrant:~# systemctl restart apache2
-root@vagrant:~# curl www/test.site/public_html
-curl: (6) Could not resolve host: www
-root@vagrant:~# curl test.site/public_html
-<!DOCTYPE HTML PUBLIC "-//IETF//DTD HTML 2.0//EN">
-<html><head>
-<title>404 Not Found</title>
-</head><body>
-<h1>Not Found</h1>
-<p>The requested URL was not found on this server.</p>
-<hr>
-<address>Apache/2.4.41 (Ubuntu) Server at test.site Port 80</address>
-</body></html>
-root@vagrant:~# openssl req -x509 -nodes -days 365 -newkey rsa:2048 -keyout /etc/ssl/private/apache-selfsigned.key -out /etc/ssl/certs/apache-selfsigned.crt
+artem@artem-aspirer3610:~$ sudo systemctl restart apache2
+artem@artem-aspirer3610:~$ sudo openssl req -x509 -nodes -days 365 -newkey rsa:2048 -keyout /etc/ssl/private/apache-selfsigned.key -out /etc/ssl/certs/apache-selfsigned.crt
+
+[sudo] пароль для artem: 
 Generating a RSA private key
-.......................................................................+++++
-....................................+++++
+.................+++++
+...........................................................................+++++
 writing new private key to '/etc/ssl/private/apache-selfsigned.key'
 -----
 You are about to be asked to enter information that will be incorporated
@@ -116,105 +54,50 @@ For some fields there will be a default value,
 If you enter '.', the field will be left blank.
 -----
 Country Name (2 letter code) [AU]:RU
-State or Province Name (full name) [Some-State]:Tver
-Locality Name (eg, city) []:Tver City
-Organization Name (eg, company) [Internet Widgits Pty Ltd]:Home made, Inc
-Organizational Unit Name (eg, section) []:Ministry of Magic
-Common Name (e.g. server FQDN or YOUR name) []:127.0.0.1
-Email Address []:admin@test.site
-root@vagrant:~# nano /etc/apache2/conf-available/ssl-params.conf
-root@vagrant:~# cp /etc/apache2/sites-available/default-ssl.conf /etc/apache2/sites-available/default-ssl.conf.bak
-root@vagrant:~# nano /etc/apache2/sites-available/default-ssl.conf
+State or Province Name (full name) [Some-State]:Moscow
+Locality Name (eg, city) []:Moscow
+Organization Name (eg, company) [Internet Widgits Pty Ltd]:Company
+Organizational Unit Name (eg, section) []:Org
+Common Name (e.g. server FQDN or YOUR name) []:www.example.com
+Email Address []:admin@example.com
+artem@artem-aspirer3610:~$ sudo nano /etc/apache2/sites-available/example_com.conf                                                                    
+artem@artem-aspirer3610:~$ sudo mkdir /var/www/example_com  
 
+artem@artem-aspirer3610:~$ sudo nano /var/www/example_com/index.html
 
-Use "fg" to return to nano.
+artem@artem-aspirer3610:~$ sudo a2ensite example_com.conf
 
-[1]+  Stopped                 nano /etc/apache2/sites-available/default-ssl.conf
-root@vagrant:~# nano /etc/apache2/sites-available/default-ssl.conf
-root@vagrant:~# nano /etc/apache2/sites-available/default-ssl.conf
-root@vagrant:~# ufw app list
-Available applications:
-  Apache
-  Apache Full
-  Apache Secure
-  OpenSSH
-root@vagrant:~# ufw status
-Status: inactive
-root@vagrant:~# a2enmod ssl
-Considering dependency setenvif for ssl:
-Module setenvif already enabled
-Considering dependency mime for ssl:
-Module mime already enabled
-Considering dependency socache_shmcb for ssl:
-Module socache_shmcb already enabled
-Module ssl already enabled
-root@vagrant:~# a2ensite default-ssl
-Enabling site default-ssl.
+Enabling site example_com.
 To activate the new configuration, you need to run:
   systemctl reload apache2
-root@vagrant:~# systemctl reload apache2
-root@vagrant:~# a2enconf ssl-params
-Enabling conf ssl-params.
-To activate the new configuration, you need to run:
-  systemctl reload apache2
-root@vagrant:~# systemctl reload apache2
-root@vagrant:~# apache2ctl configtest
-AH00112: Warning: DocumentRoot [/var/www/test.site/public_html] does not exist
+artem@artem-aspirer3610:~$ systemctl reload apache2
+Failed to reload apache2.service: Access denied
+See system logs and 'systemctl status apache2.service' for details.
+artem@artem-aspirer3610:~$ systemctl reload apache2
+Failed to reload apache2.service: Access denied
+See system logs and 'systemctl status apache2.service' for details.
+artem@artem-aspirer3610:~$ systemctl reload apache2
+artem@artem-aspirer3610:~$ sudo apache2ctl configtest
 AH00558: apache2: Could not reliably determine the server's fully qualified domain name, using 127.0.1.1. Set the 'ServerName' directive globally to suppress this message
 Syntax OK
-root@vagrant:~# nano /etc/apache2/sites-available/default-ssl.conf
-root@vagrant:~# systemctl reload apache2
-root@vagrant:~# apache2ctl configtest
-AH00112: Warning: DocumentRoot [/var/www/test.site/public_html] does not exist
-AH00558: apache2: Could not reliably determine the server's fully qualified domain name, using 127.0.1.1. Set the 'ServerName' directive globally to suppress this message
-Syntax OK
-root@vagrant:~# nano /etc/apache2/sites-available/default-ssl.conf
-root@vagrant:~# nano /etc/apache2/sites-available/test.site.conf
-root@vagrant:~# nano /var/www/test.site/public_html
-root@vagrant:~# cat /var/www/test.site/public_html
-cat: /var/www/test.site/public_html: No such file or directory
-root@vagrant:~# ls /var/www/test.site
-ls: cannot access '/var/www/test.site': No such file or directory
-root@vagrant:~# nano /etc/apache2/sites-available/test.site.conf
-root@vagrant:~# nano /etc/apache2/sites-available/default-ssl.conf
-root@vagrant:~# nano /etc/apache2/sites-available/test.site.conf
-root@vagrant:~# nano /etc/apache2/sites-available/default-ssl.conf
-root@vagrant:~# systemctl reload apache2
-root@vagrant:~# apache2ctl configtest
-AH00112: Warning: DocumentRoot [/var/www/test.site/public_html] does not exist
-AH00112: Warning: DocumentRoot [/var/www/test.site/public_html] does not exist
-AH00558: apache2: Could not reliably determine the server's fully qualified domain name, using 127.0.1.1. Set the 'ServerName' directive globally to suppress this message
-Syntax OK
-root@vagrant:~# nano /etc/apache2/sites-available/default-ssl.conf
-root@vagrant:~# nano /etc/apache2/sites-available/test.site.conf
-root@vagrant:~# systemctl reload apache2
-Job for apache2.service failed.
-See "systemctl status apache2.service" and "journalctl -xe" for details.
-root@vagrant:~# nano /etc/apache2/sites-available/test.site.conf
-root@vagrant:~# systemctl reload apache2
-root@vagrant:~# curl https://test.site/
-curl: (60) SSL certificate problem: self signed certificate
-More details here: https://curl.haxx.se/docs/sslcerts.html
-
-curl failed to verify the legitimacy of the server and therefore could not
-establish a secure connection to it. To learn more about this situation and
-how to fix it, please visit the web page mentioned above.
-```
-
-Содержание файла /etc/apache2/sites-available/test.site.conf
 
 ```
-<VirtualHost *:80>
-ServerName test.site
-ServerAlias www.test.site
-ServerAdmin webmaster@localhost
-DocumentRoot /var/www/test.site/public_html
-ErrorLog ${APACHE_LOG_DIR}/error.log
-CustomLog ${APACHE_LOG_DIR}/access.log combined
+
+
+Содержание файла /etc/apache2/sites-available/example_com.conf
+
+```
+<VirtualHost *:443>
+   ServerName example_com
+   DocumentRoot /var/www/example_com
+
+   SSLEngine on
+   SSLCertificateFile /etc/ssl/certs/apache-selfsigned.crt
+   SSLCertificateKeyFile /etc/ssl/private/apache-selfsigned.key
 </VirtualHost>
 ```
 
-Содержание файла /etc/apache2/sites-available/default-ssl.conf
+?????? Содержание файла /etc/apache2/sites-available/default-ssl.conf
 
 ```
 <IfModule mod_ssl.c>
