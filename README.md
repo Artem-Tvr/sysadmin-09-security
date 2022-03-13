@@ -18,32 +18,13 @@
 
 *Решение*
 
-Ниже указал последовательность моих действий, но в браузере сайт не о Подскажите куда копать?
+Ниже указал последовательность моих действий, но в браузере сайт не открылся и при проверке на корректность настроек выдал следующее - AH00112: Warning: DocumentRoot [/var/www/test.site/public_html] does not exist - ругается что не существует директория, но как ее создать не понял. Подскажите куда копать?
 
 ```
-artem@artem-aspirer3610:~$ sudo systemctl enable apache2
-Synchronizing state of apache2.service with SysV service script with /lib/systemd/systemd-sysv-install.
-Executing: /lib/systemd/systemd-sysv-install enable apache2
-artem@artem-aspirer3610:~$ Sudo a2enmod ssl
-bash: Sudo: команда не найдена
-artem@artem-aspirer3610:~$ sudo a2enmod ssl
-Considering dependency setenvif for ssl:
-Module setenvif already enabled
-Considering dependency mime for ssl:
-Module mime already enabled
-Considering dependency socache_shmcb for ssl:
-Enabling module socache_shmcb.
-Enabling module ssl.
-See /usr/share/doc/apache2/README.Debian.gz on how to configure SSL and create self-signed certificates.
-To activate the new configuration, you need to run:
-  systemctl restart apache2
-artem@artem-aspirer3610:~$ sudo systemctl restart apache2
-artem@artem-aspirer3610:~$ sudo openssl req -x509 -nodes -days 365 -newkey rsa:2048 -keyout /etc/ssl/private/apache-selfsigned.key -out /etc/ssl/certs/apache-selfsigned.crt
-
-[sudo] пароль для artem: 
+root@vagrant:~# sudo openssl req -x509 -nodes -days 365 -newkey rsa:2048 -keyout /etc/ssl/private/apache-selfsigned.key -out /etc/ssl/certs/apache-selfsigned.crt
 Generating a RSA private key
-.................+++++
-...........................................................................+++++
+...+++++
+.....................................+++++
 writing new private key to '/etc/ssl/private/apache-selfsigned.key'
 -----
 You are about to be asked to enter information that will be incorporated
@@ -60,69 +41,99 @@ Organization Name (eg, company) [Internet Widgits Pty Ltd]:Company
 Organizational Unit Name (eg, section) []:Org
 Common Name (e.g. server FQDN or YOUR name) []:www.example.com
 Email Address []:admin@example.com
-artem@artem-aspirer3610:~$ sudo nano /etc/apache2/sites-available/example_com.conf                                                                    
-artem@artem-aspirer3610:~$ sudo mkdir /var/www/example_com  
-
-artem@artem-aspirer3610:~$ sudo nano /var/www/example_com/index.html
-
-artem@artem-aspirer3610:~$ sudo a2ensite example_com.conf
-
-Enabling site example_com.
+root@vagrant:~# nano /etc/apache2/conf-available/ssl-params.conf
+root@vagrant:~# cp /etc/apache2/sites-available/default-ssl.conf /etc/apache2/sites-available/default-ssl.conf.bak
+root@vagrant:~# nano /etc/apache2/sites-available/default-ssl.conf
+root@vagrant:~# nano /etc/apache2/sites-available/000-default.conf
+root@vagrant:~# sudo a2enmod ssl
+Considering dependency setenvif for ssl:
+Module setenvif already enabled
+Considering dependency mime for ssl:
+Module mime already enabled
+Considering dependency socache_shmcb for ssl:
+Enabling module socache_shmcb.
+Enabling module ssl.
+See /usr/share/doc/apache2/README.Debian.gz on how to configure SSL and create self-signed certificates.
+To activate the new configuration, you need to run:
+  systemctl restart apache2
+root@vagrant:~# sudo a2enmod headers
+Enabling module headers.
+To activate the new configuration, you need to run:
+  systemctl restart apache2
+root@vagrant:~# sudo a2ensite default-ssl
+Enabling site default-ssl.
 To activate the new configuration, you need to run:
   systemctl reload apache2
-artem@artem-aspirer3610:~$ systemctl reload apache2
-Failed to reload apache2.service: Access denied
-See system logs and 'systemctl status apache2.service' for details.
-artem@artem-aspirer3610:~$ systemctl reload apache2
-Failed to reload apache2.service: Access denied
-See system logs and 'systemctl status apache2.service' for details.
-artem@artem-aspirer3610:~$ systemctl reload apache2
-artem@artem-aspirer3610:~$ sudo apache2ctl configtest
+root@vagrant:~# sudo a2enconf ssl-params
+Enabling conf ssl-params.
+To activate the new configuration, you need to run:
+  systemctl reload apache2
+root@vagrant:~# sudo apache2ctl configtest
 AH00558: apache2: Could not reliably determine the server's fully qualified domain name, using 127.0.1.1. Set the 'ServerName' directive globally to suppress this message
 Syntax OK
-
+root@vagrant:~# sudo systemctl restart apache2
 ```
 
-
-Содержание файла /etc/apache2/sites-available/example_com.conf
+Содержание файла /etc/apache2/sites-available/000-default.conf
 
 ```
-<VirtualHost *:443>
-   ServerName example_com
-   DocumentRoot /var/www/example_com
+<VirtualHost *:80>
+        # The ServerName directive sets the request scheme, hostname and port that
+        # the server uses to identify itself. This is used when creating
+        # redirection URLs. In the context of virtual hosts, the ServerName
+        # specifies what hostname must appear in the request's Host: header to
+        # match this virtual host. For the default virtual host (this file) this
+        # value is not decisive as it is used as a last resort host regardless.
+        # However, you must set it for any further virtual host explicitly.
+        #ServerName www.example.com
 
-   SSLEngine on
-   SSLCertificateFile /etc/ssl/certs/apache-selfsigned.crt
-   SSLCertificateKeyFile /etc/ssl/private/apache-selfsigned.key
+        #ServerAdmin webmaster@localhost
+        #DocumentRoot /var/www/html
+        Redirect "/" "https://localhost/"
+        # Available loglevels: trace8, ..., trace1, debug, info, notice, warn,
+        # error, crit, alert, emerg.
+        # It is also possible to configure the loglevel for particular
+        # modules, e.g.
+        #LogLevel info ssl:warn
+
+        ErrorLog ${APACHE_LOG_DIR}/error.log
+        CustomLog ${APACHE_LOG_DIR}/access.log combined
+
+        # For most configuration files from conf-available/, which are
+        # enabled or disabled at a global level, it is possible to
+        # include a line for only one particular virtual host. For example the
+        # following line enables the CGI configuration for this host only
+        # after it has been globally disabled with "a2disconf".
+        #Include conf-available/serve-cgi-bin.conf
 </VirtualHost>
 ```
 
-?????? Содержание файла /etc/apache2/sites-available/default-ssl.conf
+Содержание файла /etc/apache2/sites-available/default-ssl.conf
 
 ```
 <IfModule mod_ssl.c>
-    <VirtualHost _default_:443>
-            ServerAdmin your_email@example.com
-            ServerName 127.0.0.1
+        <VirtualHost _default_:443>
+                ServerAdmin your_email@example.com
+                ServerName localhost
 
-            DocumentRoot /var/www/html
+                DocumentRoot /var/www/html
 
-            ErrorLog ${APACHE_LOG_DIR}/error.log
-            CustomLog ${APACHE_LOG_DIR}/access.log combined
+                ErrorLog ${APACHE_LOG_DIR}/error.log
+                CustomLog ${APACHE_LOG_DIR}/access.log combined
 
-            SSLEngine on
+                SSLEngine on
 
-            SSLCertificateFile      /etc/ssl/certs/apache-selfsigned.crt
-            SSLCertificateKeyFile /etc/ssl/private/apache-selfsigned.key
+                SSLCertificateFile      /etc/ssl/certs/apache-selfsigned.crt
+                SSLCertificateKeyFile /etc/ssl/private/apache-selfsigned.key
 
-            <FilesMatch "\.(cgi|shtml|phtml|php)$">
-                            SSLOptions +StdEnvVars
-            </FilesMatch>
-            <Directory /usr/lib/cgi-bin>
-                            SSLOptions +StdEnvVars
-            </Directory>
-    </VirtualHost>
+                <FilesMatch "\.(cgi|shtml|phtml|php)$">
+                                SSLOptions +StdEnvVars
+                </FilesMatch>
+                <Directory /usr/lib/cgi-bin>
+                                SSLOptions +StdEnvVars
+                </Directory>
 
+        </VirtualHost>
 </IfModule>
 ```
 
@@ -191,10 +202,93 @@ root@vagrant:~/testssl.sh# ./testssl.sh -U --sneaky https://www.ozon.ru/
 
 *Решение*
 
+```
+root@vagrant:~# ssh-keygen
+Generating public/private rsa key pair.
+Enter file in which to save the key (/root/.ssh/id_rsa):
+Enter passphrase (empty for no passphrase):
+Enter same passphrase again:
+Your identification has been saved in /root/.ssh/id_rsa
+Your public key has been saved in /root/.ssh/id_rsa.pub
+The key fingerprint is:
+SHA256:LXZ7AwHIoLFtCYAzP7/t2Y46qax9AM46bUAbwihh9+k root@vagrant
+The key's randomart image is:
++---[RSA 3072]----+
+|o.o .o ..        |
+|=. B .o  .       |
++----[SHA256]-----+
+```
+
+```
+root@vagrant:~# ssh-copy-id -i .ssh/id_rsa artem@192.168.1.115
+/usr/bin/ssh-copy-id: INFO: Source of key(s) to be installed: ".ssh/id_rsa.pub"
+The authenticity of host '192.168.1.115 (192.168.1.115)' can't be established.
+ECDSA key fingerprint is SHA256:SS2QxOoEVUS+Pw1O5MryuEQiFGTAepX0yg/Fuk79sPA.
+Are you sure you want to continue connecting (yes/no/[fingerprint])? y
+Please type 'yes', 'no' or the fingerprint: yes
+/usr/bin/ssh-copy-id: INFO: attempting to log in with the new key(s), to filter out any that are already installed
+/usr/bin/ssh-copy-id: INFO: 1 key(s) remain to be installed -- if you are prompted now it is to install the new keys
+artem@192.168.1.115's password:
+
+Number of key(s) added: 1
+
+Now try logging into the machine, with:   "ssh 'artem@192.168.1.115'"
+and check to make sure that only the key(s) you wanted were added.
+
+root@vagrant:~# ssh artem@192.168.1.115
+Linux artem-aspirer3610 5.10.0-11-amd64 #1 SMP Debian 5.10.92-1 (2022-01-18) x86_64
+
+The programs included with the Debian GNU/Linux system are free software;
+the exact distribution terms for each program are described in the
+individual files in /usr/share/doc/*/copyright.
+
+Debian GNU/Linux comes with ABSOLUTELY NO WARRANTY, to the extent
+permitted by applicable law.
+Last login: Sun Mar 13 14:53:55 2022 from 192.168.1.83
+artem@artem-aspirer3610:~$
+```
+
+
 (6) Переименуйте файлы ключей из задания 5. Настройте файл конфигурации SSH клиента, так чтобы вход на удаленный сервер осуществлялся по имени сервера.
 
 *Решение*
 
+```
+root@vagrant:~# sudo mv ~/.ssh/id_rsa ~/.ssh/id_rsa_devops
+root@vagrant:~# nano ~/.ssh/config
+root@vagrant:~# ssh SparkyLinux
+Linux artem-aspirer3610 5.10.0-11-amd64 #1 SMP Debian 5.10.92-1 (2022-01-18) x86_64
+
+The programs included with the Debian GNU/Linux system are free software;
+the exact distribution terms for each program are described in the
+individual files in /usr/share/doc/*/copyright.
+
+Debian GNU/Linux comes with ABSOLUTELY NO WARRANTY, to the extent
+permitted by applicable law.
+Last login: Sun Mar 13 15:09:33 2022 from 192.168.1.83
+artem@artem-aspirer3610:~$
+```
+
+
+Конфигурация файла ~/.ssh/config
+
+Host SparkyLinux
+        HostName 192.168.1.115
+        User artem
+        Port 22
+        IdentityFile ~/.ssh/id_rsa_devops
 (7) Соберите дамп трафика утилитой tcpdump в формате pcap, 100 пакетов. Откройте файл pcap в Wireshark.
 
 *Решение*
+
+
+```
+artem@artem-aspirer3610:~$ sudo tcpdump -i any -c 100 -w file.pcap
+tcpdump: data link type LINUX_SLL2
+tcpdump: listening on any, link-type LINUX_SLL2 (Linux cooked v2), snapshot length 262144 bytes
+100 packets captured
+100 packets received by filter
+0 packets dropped by kernel
+```
+
+![3.jpg](./assets/3.jpg)
