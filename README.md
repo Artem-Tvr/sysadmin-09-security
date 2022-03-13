@@ -248,7 +248,6 @@ Last login: Sun Mar 13 14:53:55 2022 from 192.168.1.83
 artem@artem-aspirer3610:~$
 ```
 
-
 (6) Переименуйте файлы ключей из задания 5. Настройте файл конфигурации SSH клиента, так чтобы вход на удаленный сервер осуществлялся по имени сервера.
 
 *Решение*
@@ -269,18 +268,19 @@ Last login: Sun Mar 13 15:09:33 2022 from 192.168.1.83
 artem@artem-aspirer3610:~$
 ```
 
-
 Конфигурация файла ~/.ssh/config
 
+```
 Host SparkyLinux
         HostName 192.168.1.115
         User artem
         Port 22
         IdentityFile ~/.ssh/id_rsa_devops
+```
+
 (7) Соберите дамп трафика утилитой tcpdump в формате pcap, 100 пакетов. Откройте файл pcap в Wireshark.
 
 *Решение*
-
 
 ```
 artem@artem-aspirer3610:~$ sudo tcpdump -i any -c 100 -w file.pcap
