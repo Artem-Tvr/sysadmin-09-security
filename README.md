@@ -18,8 +18,6 @@
 
 *Решение*
 
-Ниже указал последовательность моих действий, но в браузере сайт не открылся и при проверке на корректность настроек выдал следующее - AH00112: Warning: DocumentRoot [/var/www/test.site/public_html] does not exist - ругается что не существует директория, но как ее создать не понял. Подскажите куда копать?
-
 ```
 root@vagrant:~# sudo openssl req -x509 -nodes -days 365 -newkey rsa:2048 -keyout /etc/ssl/private/apache-selfsigned.key -out /etc/ssl/certs/apache-selfsigned.crt
 Generating a RSA private key
